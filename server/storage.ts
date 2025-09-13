@@ -109,6 +109,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFloodZone(zone: InsertFloodZone): Promise<FloodZone> {
+    console.log("Creating flood zone with data:", zone);
     const [newZone] = await db.insert(floodZones).values(zone).returning();
     return newZone;
   }

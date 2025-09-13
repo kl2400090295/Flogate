@@ -26,14 +26,7 @@ export default function Landing() {
                 <p className="text-sm text-muted-foreground">Disaster Management System</p>
               </div>
             </div>
-            <Button 
-              onClick={() => window.location.href = '/api/login'}
-              data-testid="login-button"
-              className="flex items-center space-x-2"
-            >
-              <Shield className="w-4 h-4" />
-              <span>Login to Dashboard</span>
-            </Button>
+            
           </div>
         </div>
       </header>
@@ -56,15 +49,7 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              onClick={() => window.location.href = '/api/login'}
-              data-testid="get-started-button"
-              className="flex items-center space-x-2"
-            >
-              <AlertTriangle className="w-5 h-5" />
-              <span>Access Emergency Dashboard</span>
-            </Button>
+            
             <Button 
               size="lg" 
               variant="outline"
@@ -229,15 +214,7 @@ export default function Landing() {
               Join district authorities and relief organizations using FloodWatch to save lives 
               and optimize relief operations during flood emergencies.
             </p>
-            <Button 
-              size="lg"
-              onClick={() => window.location.href = '/api/login'}
-              data-testid="cta-login-button"
-              className="flex items-center space-x-2"
-            >
-              <Shield className="w-5 h-5" />
-              <span>Access Emergency Dashboard</span>
-            </Button>
+            
           </div>
         </div>
       </section>

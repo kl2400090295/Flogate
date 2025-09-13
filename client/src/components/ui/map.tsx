@@ -52,7 +52,7 @@ export function Map({ center, zoom = 10, className = "", onMapReady, children }:
   }, [center, zoom, onMapReady]);
 
   return (
-    <div className={`h-full w-full ${className}`} ref={mapRef} data-testid="leaflet-map">
+    <div className={`h-full w-full ${className}`} ref={mapRef} data-testid="leaflet-map" style={{ zIndex: 10 }}>
       {children}
     </div>
   );

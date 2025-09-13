@@ -14,22 +14,13 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  // await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  
 
   // Dashboard statistics
-  app.get("/api/dashboard/stats", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard/stats", async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
@@ -40,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Flood zones
-  app.get("/api/flood-zones", isAuthenticated, async (req, res) => {
+  app.get("/api/flood-zones", async (req, res) => {
     try {
       const zones = await storage.getFloodZones();
       res.json(zones);
@@ -50,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/flood-zones", isAuthenticated, async (req: any, res) => {
+  app.post("/api/flood-zones", async (req: any, res) => {
     try {
       const zoneData = insertFloodZoneSchema.parse(req.body);
       const zone = await storage.createFloodZone(zoneData);
@@ -61,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Created flood zone: ${zone.name}`,
         entityType: "flood_zone",
         entityId: zone.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: zone.district,
       });
 
@@ -72,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/flood-zones/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/flood-zones/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -88,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Updated flood zone: ${zone.name}`,
         entityType: "flood_zone",
         entityId: zone.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: zone.district,
         metadata: updates,
       });
@@ -101,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Affected population
-  app.get("/api/population", isAuthenticated, async (req, res) => {
+  app.get("/api/population", async (req, res) => {
     try {
       const floodZoneId = req.query.floodZoneId as string;
       const population = await storage.getAffectedPopulation(floodZoneId);
@@ -112,11 +103,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/population", isAuthenticated, async (req: any, res) => {
+  app.post("/api/population", async (req: any, res) => {
     try {
       const personData = insertAffectedPopulationSchema.parse({
         ...req.body,
-        registeredBy: req.user.claims.sub,
+        registeredBy: "system",
       });
       const person = await storage.createAffectedPerson(personData);
       
@@ -126,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Registered affected person: ${person.name}`,
         entityType: "population",
         entityId: person.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: person.address || "Unknown",
       });
 
@@ -137,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/population/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/population/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -153,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Updated affected person: ${person.name}`,
         entityType: "population",
         entityId: person.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         metadata: updates,
       });
 
@@ -165,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Resources
-  app.get("/api/resources", isAuthenticated, async (req, res) => {
+  app.get("/api/resources", async (req, res) => {
     try {
       const resources = await storage.getResources();
       res.json(resources);
@@ -175,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/resources", isAuthenticated, async (req: any, res) => {
+  app.post("/api/resources", async (req: any, res) => {
     try {
       const resourceData = insertResourceSchema.parse(req.body);
       const resource = await storage.createResource(resourceData);
@@ -186,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Added resource: ${resource.name} (${resource.totalQuantity} ${resource.unit})`,
         entityType: "resource",
         entityId: resource.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: resource.location || "Central Store",
       });
 
@@ -197,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/resources/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/resources/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -213,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Updated resource: ${resource.name}`,
         entityType: "resource",
         entityId: resource.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         metadata: updates,
       });
 
@@ -225,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Relief distribution
-  app.get("/api/relief-distribution", isAuthenticated, async (req, res) => {
+  app.get("/api/relief-distribution", async (req, res) => {
     try {
       const floodZoneId = req.query.floodZoneId as string;
       const distributions = await storage.getReliefDistributions(floodZoneId);
@@ -236,11 +227,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/relief-distribution", isAuthenticated, async (req: any, res) => {
+  app.post("/api/relief-distribution", async (req: any, res) => {
     try {
       const distributionData = insertReliefDistributionSchema.parse({
         ...req.body,
-        distributedBy: req.user.claims.sub,
+        distributedBy: "system",
       });
       const distribution = await storage.createReliefDistribution(distributionData);
       
@@ -250,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Distributed relief: ${distribution.quantity} units to ${distribution.distributedTo}`,
         entityType: "distribution",
         entityId: distribution.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: distribution.distributedTo || "Unknown",
       });
 
@@ -262,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Weather alerts
-  app.get("/api/weather-alerts", isAuthenticated, async (req, res) => {
+  app.get("/api/weather-alerts", async (req, res) => {
     try {
       const alerts = await storage.getActiveWeatherAlerts();
       res.json(alerts);
@@ -272,11 +263,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/weather-alerts", isAuthenticated, async (req: any, res) => {
+  app.post("/api/weather-alerts", async (req: any, res) => {
     try {
       const alertData = insertWeatherAlertSchema.parse({
         ...req.body,
-        createdBy: req.user.claims.sub,
+        createdBy: "system",
       });
       const alert = await storage.createWeatherAlert(alertData);
       
@@ -286,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Created ${alert.severity} alert: ${alert.title}`,
         entityType: "alert",
         entityId: alert.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: alert.affectedArea || "Unknown",
       });
 
@@ -297,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/weather-alerts/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/weather-alerts/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deactivateWeatherAlert(id);
@@ -308,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Deactivated weather alert`,
         entityType: "alert",
         entityId: id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
       });
 
       res.json({ success: true });
@@ -319,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Response teams
-  app.get("/api/response-teams", isAuthenticated, async (req, res) => {
+  app.get("/api/response-teams", async (req, res) => {
     try {
       const teams = await storage.getResponseTeams();
       res.json(teams);
@@ -329,11 +320,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/response-teams", isAuthenticated, async (req: any, res) => {
+  app.post("/api/response-teams", async (req: any, res) => {
     try {
       const teamData = insertResponseTeamSchema.parse({
         ...req.body,
-        leadOfficer: req.user.claims.sub,
+        leadOfficer: "system",
       });
       const team = await storage.createResponseTeam(teamData);
       
@@ -343,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Created response team: ${team.name}`,
         entityType: "team",
         entityId: team.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         location: team.currentLocation || "Base",
       });
 
@@ -354,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/response-teams/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/response-teams/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -370,7 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Updated response team: ${team.name}`,
         entityType: "team",
         entityId: team.id,
-        performedBy: req.user.claims.sub,
+        performedBy: "system",
         metadata: updates,
       });
 
@@ -382,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity log
-  app.get("/api/activities", isAuthenticated, async (req, res) => {
+  app.get("/api/activities", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const activities = await storage.getRecentActivities(limit);
@@ -394,7 +385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Weather data integration (OpenWeatherMap API)
-  app.get("/api/weather/:location", isAuthenticated, async (req, res) => {
+  app.get("/api/weather/:location", async (req, res) => {
     try {
       const { location } = req.params;
       const apiKey = process.env.OPENWEATHER_API_KEY;

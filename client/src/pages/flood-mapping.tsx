@@ -178,7 +178,7 @@ export default function FloodMapping() {
               Add Flood Zone
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md z-50 overflow-y-auto max-h-screen">
             <DialogHeader>
               <DialogTitle>Create New Flood Zone</DialogTitle>
             </DialogHeader>
